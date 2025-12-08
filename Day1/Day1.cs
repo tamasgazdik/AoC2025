@@ -15,7 +15,7 @@ namespace AoC2025.Day1
                 var zeroCounter = 0;
 
                 var dataTxtLocation = @"C:\Users\sonrisa\OneDrive - Sonrisa Kft\WS\AoC2025\Data\input_day1.txt";
-                var instructions = InputDataParser.ParseInputTxt<List<string>, string>(dataTxtLocation);
+                var instructions = InputDataParser.ParseInputTxtLineByLine<List<string>, string>(dataTxtLocation);
 
                 //var instructions = new List<string>
                 //{
@@ -79,7 +79,7 @@ namespace AoC2025.Day1
                 var zeroIsPassedCounter = 0;
 
                 var dataTxtLocation = @"C:\Users\sonrisa\OneDrive - Sonrisa Kft\WS\AoC2025\Data\input_day1.txt";
-                var instructions = InputDataParser.ParseInputTxt<List<string>, string>(dataTxtLocation);
+                var instructions = InputDataParser.ParseInputTxtLineByLine<List<string>, string>(dataTxtLocation);
 
                 foreach (var instruction in instructions)
                 {

@@ -6,6 +6,9 @@
         {
             Day1.Day1.Part1.Solve();
             Day1.Day1.Part2.Solve();
+
+            Day2.Day2.Part1.Solve();
+            Day2.Day2.Part2.Solve();
         }
     }
 }
