@@ -10,7 +10,10 @@
             //Day2.Day2.Part1.Solve();
             //Day2.Day2.Part2.Solve();
 
-            Day3.Day3.Part1_Part2.Solve();
+            //Day3.Day3.Part1_Part2.Solve();
+
+            Day4.Day4.Part1.Solve();
+            Day4.Day4.Part2.Solve();
         }
     }
 }
