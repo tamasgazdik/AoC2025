@@ -12,8 +12,11 @@
 
             //Day3.Day3.Part1_Part2.Solve();
 
-            Day4.Day4.Part1.Solve();
-            Day4.Day4.Part2.Solve();
+            //Day4.Day4.Part1.Solve();
+            //Day4.Day4.Part2.Solve();
+
+            Day5.Day5.Part1.Solve();
+            Day5.Day5.Part2.Solve();
         }
     }
 }

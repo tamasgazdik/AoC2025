@@ -29,7 +29,7 @@ namespace AoC2025.Utils
 
         internal static string ParseSingleLineInputTxt(string location)
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
 
             using (var fileReader = new StreamReader(location))
             {
@@ -39,6 +39,24 @@ namespace AoC2025.Utils
                     if (readLine == null) continue;
 
                     stringBuilder.Append(readLine);
+                }
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        internal static string ParseInputTxtAsSingleString(string location)
+        {
+            var stringBuilder = new StringBuilder();
+
+            using (var fileReader = new StreamReader(location))
+            {
+                while (!fileReader.EndOfStream)
+                {
+                    var readLine = fileReader.ReadLine();
+                    if (readLine == null) continue;
+
+                    stringBuilder.AppendLine(readLine);
                 }
             }
 
