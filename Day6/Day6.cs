@@ -81,7 +81,6 @@ namespace AoC2025.Day6
                     "123 328  51 64 ",
                     " 45 64  387 23 ",
                     "  6 98  215 314",
-                    " 27 512  10   6", // dummy line added by me for testing
                     "*   +   *   +  "
                 };
 
@@ -177,17 +176,17 @@ namespace AoC2025.Day6
                         {
                             var element = inputArray[l];
                             var digit = ((element / k) % 10);
-                            if (digit > 0)
-                            {
-                                lastNumber *= 10;
-                            }
 
                             numberToAddToResultList += (ulong)(digit * Math.Pow(10, inputArray.Length - l - 1));
                         }
 
+                        while (numberToAddToResultList % 10 == 0)
+                        {
+                            numberToAddToResultList /= 10;
+                        }
+
                         resultList.Add(numberToAddToResultList); 
                     }
-
 
                     Console.WriteLine($"Quotient for {i + 1}th round of inputs is {quotient}.");
                 }
