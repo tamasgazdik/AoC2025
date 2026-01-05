@@ -1,4 +1,5 @@
 ﻿using AoC2025.Utils;
+using System.Diagnostics;
 using System.Text;
 
 namespace AoC2025.Day10
@@ -33,8 +34,6 @@ namespace AoC2025.Day10
                 }
 
                 Console.WriteLine(sumOfMinCombinationCount);
-
-                Console.ReadKey();
             }
 
             private static int GetMinCombinationCountTheIdiomaticWay(MachineLine machineLine)
@@ -195,35 +194,6 @@ namespace AoC2025.Day10
                 }
             }
 
-            private static void PickOneMoreButton(
-                HashSet<Button> buttonsPicked, 
-                int numberOfButtonsToPick,
-                List<Button> buttonsAvailable,
-                HashSet<HashSet<Button>> possibleCombinations)
-            {
-                foreach (var button in buttonsAvailable)
-                {
-                    if (buttonsPicked.Contains(button))
-                    {
-                        continue;
-                    }
-
-                    buttonsPicked.Add(button);
-                    if (possibleCombinations.Any(previousCombination => buttonsPicked.All(button => previousCombination.Contains(button))))
-                    {
-                        continue;
-                    }
-                    if (buttonsPicked.Count == numberOfButtonsToPick)
-                    {
-                        possibleCombinations.Add(buttonsPicked); 
-                    }
-                    else
-                    {
-                        PickOneMoreButton(buttonsPicked, numberOfButtonsToPick, buttonsAvailable, possibleCombinations);
-                    }
-                }
-            }
-
             private static char[] PressButton(Button button, char[] lights)
             {
                 var result = new char[lights.Length];
@@ -244,63 +214,239 @@ namespace AoC2025.Day10
 
                 return result;
             }
+        }
 
-            private static int CalculateDifference(char[] one, char[] theOther)
+        internal static class Part2
+        {
+            public static void Solve()
             {
-                var difference = 0;
-                for (int i = 0; i < one.Length; i++)
+                //var dataTxtLocation = "C:\\WS\\AoC2025\\Data\\input_day10.txt";
+                //var input = InputDataParser.ParseInputTxtLineByLine<List<string>, string>(dataTxtLocation);
+                var input = new List<string>
                 {
-                    if (one[i] != theOther[i])
+                    "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}",
+                    "[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}",
+                    "[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}"
+                };
+
+                var machineLines = ProcessInput(input);
+                var totalButtonPushes = 0;
+
+                foreach (var machineLine in machineLines)
+                {
+                    var buttons = machineLine.Buttons;
+                    var joltage = machineLine.Joltage;
+
+                    var currentPosition = Enumerable.Repeat(0, joltage.Target.Count).ToList();
+                    var indecesWhereTargetIsReached = new List<int>();
+
+                    while (indecesWhereTargetIsReached.Count < joltage.Target.Count)
                     {
-                        difference++;
+                        // probably need to loop this
+                        var minJoltageIndex = -1;
+                        var minJoltage = int.MaxValue;
+                        for (int i = 0; i < joltage.Count; i++)
+                        {
+                            if (indecesWhereTargetIsReached.Contains(i))
+                            {
+                                continue;
+                            }
+
+                            if (joltage[i] < minJoltage)
+                            {
+                                minJoltage = joltage[i];
+                                minJoltageIndex = i;
+                            }
+                        }
+
+                        var buttonsIncreasingMinJoltage = buttons
+                            .Where(button => button.Indeces.Contains(minJoltageIndex) &&
+                                            !button.Indeces.Any(index => indecesWhereTargetIsReached.Contains(index)))
+                            .ToList();
+
+                        buttonsIncreasingMinJoltage.Sort();
+                        
+                        foreach (var button in buttonsIncreasingMinJoltage)
+                        {
+                            var indecesWhereTargetIsReachedUsingThisButton = new List<int>();
+
+                            if (button.Indeces.Any(index => indecesWhereTargetIsReached.Contains(index)))
+                            {
+                                continue;
+                            }
+
+                            while (!indecesWhereTargetIsReachedUsingThisButton.Any())
+                            {
+                                PressButton(button, ref currentPosition);
+                                totalButtonPushes++;
+                                indecesWhereTargetIsReachedUsingThisButton = GetIndecesWhereTargetIsReached(currentPosition, joltage.Target, indecesWhereTargetIsReached);
+                            }
+
+                            indecesWhereTargetIsReached.AddRange(indecesWhereTargetIsReachedUsingThisButton);
+                        }
                     }
                 }
-                return difference;
             }
 
-            private record MachineLine(Lights Lights, List<Button> Buttons);
-
-            private record Lights
+            private static List<int> GetIndecesWhereTargetIsReached(List<int> currentPosition, List<int> target, List<int> indecesWhereTargetIsAlreadyReached)
             {
-                public Lights(char[] target)
+                var indecesWhereTargetIsReached = new List<int>(currentPosition.Count);
+                for (int i = 0; i < currentPosition.Count; i++)
                 {
-                    Target = target;
-                    Capacity = target.Length;
-                    Current = Enumerable.Repeat<char>('.', Capacity).ToArray();
-                }
-
-                public char[] Current { get; }
-
-                public int Capacity { get; }
-
-                public char[] Target { get; }
-
-                public override string ToString()
-                {
-                    return $"Current: [{CharArrayToString(Current)}] " +
-                        $"Target: [{CharArrayToString(Target)}]";
-                }
-
-                private static string CharArrayToString(char[] array)
-                {
-                    var sb = new StringBuilder();
-                    for (int i = 0; i < array.Length; i++)
+                    if (currentPosition[i] == target[i])
                     {
-                        sb.Append(array[i]);
+                        indecesWhereTargetIsReached.Add(i);
                     }
-
-                    return sb.ToString();
                 }
+
+                indecesWhereTargetIsReached.RemoveAll(index => indecesWhereTargetIsAlreadyReached.Contains(index));
+
+                return indecesWhereTargetIsReached;
+            }
+        }
+
+        private static List<MachineLine> ProcessInput(List<string> input)
+        {
+            var machineLines = new List<MachineLine>(input.Count);
+
+            foreach (var line in input)
+            {
+                var sections = line.Split(' ');
+                
+                var buttons = new List<Button>();
+                
+                // skip lights and joltage
+                for (int i = 1; i < sections.Length - 1; i++)
+                {
+                    // take the section without '(' and ')'
+                    var button = sections[i][1..^1];
+
+                    var indeces = button.Split(',');
+                    buttons.Add(new Button
+                    {
+                        Indeces = indeces.Select(index => int.Parse(index)).ToList()
+                    });
+                }
+
+                var joltageSection = sections[^1][1..^1];
+                var joltageValueStrings = joltageSection.Split(",");
+                var joltageValues = new List<int>();
+                foreach (var joltageValueString in joltageValueStrings)
+                {
+                    joltageValues.Add(int.Parse(joltageValueString));
+                }
+
+                machineLines.Add(new MachineLine(
+                    buttons, new Joltage(joltageValues)));
             }
 
-            private readonly struct Button
-            {
-                public List<int> Indeces { get; init; }
+            return machineLines;
+        }
 
-                public override string ToString()
+        private static void PressButton(Button button, ref List<int> joltage)
+        {
+            foreach (var index in button.Indeces)
+            {
+                joltage[index]++;
+            }
+        }
+
+        private record MachineLine
+        {
+            public MachineLine(Lights lights, List<Button> buttons)
+            {
+                Lights = lights;
+                Buttons = buttons;
+            }
+
+            public MachineLine(List<Button> buttons, Joltage joltage)
+            {
+                Buttons = buttons;
+                Joltage = joltage;
+            }
+
+            public Lights? Lights { get; init; }
+
+            public List<Button> Buttons { get; init; }
+
+            public Joltage Joltage { get; init; }
+        }
+
+        private record Lights
+        {
+            public Lights(char[] target)
+            {
+                Target = target;
+                Capacity = target.Length;
+                Current = Enumerable.Repeat<char>('.', Capacity).ToArray();
+            }
+
+            public char[] Current { get; }
+
+            public int Capacity { get; }
+
+            public char[] Target { get; }
+
+            public override string ToString()
+            {
+                return $"Current: [{CharArrayToString(Current)}] " +
+                    $"Target: [{CharArrayToString(Target)}]";
+            }
+
+            private static string CharArrayToString(char[] array)
+            {
+                var sb = new StringBuilder();
+                for (int i = 0; i < array.Length; i++)
                 {
-                    return $"({string.Join(',', Indeces)})";
+                    sb.Append(array[i]);
                 }
+
+                return sb.ToString();
+            }
+        }
+
+        private readonly struct Button : IComparable<Button>
+        {
+            public List<int> Indeces { get; init; }
+
+            public int CompareTo(Button other)
+            {
+                if (Indeces.Count == other.Indeces.Count)
+                {
+                    for (var i = 0; i < Indeces.Count; i++)
+                    {
+                        if (Indeces[i] == other.Indeces[i])
+                        {
+                            continue;
+                        }
+
+                        return Indeces[i] > other.Indeces[i] ? -1 : 1;
+                    }
+                }
+
+                return Indeces.Count > other.Indeces.Count ? -1 : 1;
+            }
+
+            public override string ToString()
+            {
+                return $"({string.Join(',', Indeces)})";
+            }
+        }
+
+        private readonly struct Joltage
+        {
+            public Joltage(List<int> target)
+            {
+                Target = target;
+            }
+
+            public int Count => Target.Count;
+
+            public List<int> Target { get; init; }
+
+            public int this[int indexer]
+            {
+                get => Target[indexer];
             }
         }
     }

@@ -27,7 +27,10 @@
 
             //Day9.Day9.Part1.Solve();
 
-            Day10.Day10.Part1.Solve();
+            //Day10.Day10.Part1.Solve();
+            //Day10.Day10.Part2.Solve();
+
+            Day11.Day11.Part2.Solve();
         }
     }
 }
